@@ -28,6 +28,12 @@ public interface GyroIO {
   }
 
   public default void updateInputs(GyroIOInputs inputs) {}
+  public default Rotation2d yawPos(){ return new Rotation2d(0, 0);}
+  public default Rotation2d rollpos(){ return new Rotation2d(0, 0);}
+
+  public default Rotation2d pitchPos(){ return new Rotation2d(0, 0);}
+
+  
 
   public default void resetGyroYawAngle(Rotation2d angle) {}
 

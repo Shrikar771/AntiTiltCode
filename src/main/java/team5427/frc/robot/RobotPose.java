@@ -4,15 +4,22 @@ import edu.wpi.first.cscore.CameraServerJNI.TelemetryKind;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator3d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
+
+import com.ctre.phoenix6.swerve.SwerveModule;
+
 import team5427.frc.robot.Constants.Mode;
 import team5427.frc.robot.subsystems.Swerve.SwerveConstants;
 import team5427.frc.robot.subsystems.Swerve.SwerveSubsystem;
@@ -22,10 +29,12 @@ import team5427.lib.detection.tuples.Tuple2Plus;
 public class RobotPose {
   public SwerveDriveOdometry odometry;
   public SwerveDrivePoseEstimator poseEstimator;
+  public SwerveDriveOdometry3d odometry3d;
+  public SwerveDrivePoseEstimator3d poseEstimator3d;
 
   private Pose2d estimatedPose = new Pose2d();
   private Pose2d odometryPose = new Pose2d();
-
+  private Pose3d robot3dPose = new Pose3d();
   @Getter private Pose2d questPose = new Pose2d();
 
   private static final Matrix<N3, N1> odometryStateStdDevs =
@@ -41,6 +50,18 @@ public class RobotPose {
   }
 
   public RobotPose() {
+    this.odometry3d = 
+        new SwerveDriveOdometry3d(
+            SwerveConstants.m_kinematics, 
+            Rotation3d.kZero, 
+            new SwerveModulePosition[] { 
+              new SwerveModulePosition(0, Rotation2d.kZero), 
+              new SwerveModulePosition(0, Rotation2d.kZero),
+              new SwerveModulePosition(0, Rotation2d.kZero),
+              new SwerveModulePosition(0, Rotation2d.kZero)
+            });
+
+
     this.odometry =
         new SwerveDriveOdometry(
             SwerveConstants.m_kinematics,
@@ -64,6 +85,7 @@ public class RobotPose {
             Pose2d.kZero,
             odometryStateStdDevs,
             VecBuilder.fill(0.04, 0.04, 9));
+    
   }
 
   public void addOdometryMeasurement(
@@ -102,6 +124,7 @@ public class RobotPose {
     this.estimatedPose = poseEstimator.getEstimatedPosition();
     return this.estimatedPose;
   }
+  
 
   public void resetAllPose(Pose2d resetPose) {
     // resetPose = resetPose.plus(new Transform2d(0, 0, Rotation2d.k180deg));

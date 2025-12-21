@@ -20,6 +20,8 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
+import team5427.frc.robot.commands.chassis.AssistedChassisSpeeds;
 import team5427.frc.robot.subsystems.Swerve.DrivingConstants;
 import team5427.frc.robot.subsystems.Swerve.SwerveConstants;
 import team5427.frc.robot.subsystems.intake.IntakeConstants;
@@ -112,7 +114,7 @@ public class Robot extends LoggedRobot {
     Superstructure.logStates();
     QuestNav.getInstance().processHeartbeat();
     QuestNav.getInstance().cleanupResponses();
-
+    new AssistedChassisSpeeds(); //run antitilt
     if (Constants.ModeTriggers.kSim.getAsBoolean()) {
       Translation3d target =
           new Pose3d(RobotPose.getInstance().getAdaptivePose())

@@ -111,6 +111,7 @@ public class GyroIOPigeon implements GyroIO {
   public void resetGyroYawAngle(Rotation2d angle) {
     gyro.setYaw(angle.getDegrees());
   }
+  pub
 
   
 }

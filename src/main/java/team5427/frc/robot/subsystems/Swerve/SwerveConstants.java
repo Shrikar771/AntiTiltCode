@@ -26,7 +26,10 @@ public final class SwerveConstants {
   public static final double kWheelBase = Units.inchesToMeters(22.75);
   public static final Distance kBumperXSize = Inches.of(30.0);
   public static final Distance kBumperYSize = Inches.of(30.0);
-
+  //TO BE CALLIBRATED: 
+  public static final double tippingThresholdDegrees = 0.0;
+  public static final double kpAntiTilt = 0.0; 
+  public static final double maxCorrectionSpeedAssist = 0.0;
   public static final AngularVelocity kMaxAngularVelocity = RotationsPerSecond.of(4.0);
 
   public static final double kCoupleRatio = 3.125;

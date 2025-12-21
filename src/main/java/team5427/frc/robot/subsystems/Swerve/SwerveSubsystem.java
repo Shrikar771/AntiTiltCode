@@ -389,7 +389,7 @@ public class SwerveSubsystem extends SubsystemBase
 
     return gyroInputs.yawPosition;
   }
-  public static Rotation3d get3DPos(){
+  public Rotation3d get3DPos(){
     Rotation3d rpyRot3d = new Rotation3d(gyroInputs.rollPosition, gyroInputs.pitchPosition, gyroInputs.yawPosition);
     return rpyRot3d;
   }
