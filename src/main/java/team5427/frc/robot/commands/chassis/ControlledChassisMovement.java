@@ -1,10 +1,14 @@
 package team5427.frc.robot.commands.chassis;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.Logger;
 import org.team4206.battleaid.common.TunedJoystick;
 import org.team4206.battleaid.common.TunedJoystick.ResponseCurve;
@@ -12,18 +16,29 @@ import team5427.frc.robot.Constants;
 import team5427.frc.robot.Constants.DriverConstants;
 import team5427.frc.robot.subsystems.Swerve.SwerveConstants;
 import team5427.frc.robot.subsystems.Swerve.SwerveSubsystem;
+import team5427.frc.robot.subsystems.Swerve.gyro.GyroIOPigeon;
 
 public class ControlledChassisMovement extends Command {
 
   private SwerveSubsystem swerveSubsystem;
   private CommandXboxController joy;
-
+  private AntiTipping antiTipping;
   private TunedJoystick translationJoystick;
   private TunedJoystick rotationJoystick;
-
+  private GyroIOPigeon gyro;
+  private Supplier<Double> pitch;
+    private Supplier<Double> roll;
+  private Rotation3d yprRot3D;
+  private boolean isFinished = false;
   private Rotation2d controlledAngle;
 
   public ControlledChassisMovement(CommandXboxController driverJoystick) {
+    yprRot3D = swerveSubsystem.get3DPos();
+    pitch =() -> yprRot3D.getY();
+    roll = () -> yprRot3D.getZ();
+    antiTipping = new AntiTipping(pitch, roll, SwerveConstants.kpAntiTilt, SwerveConstants.tippingThresholdDegrees, SwerveConstants.maxCorrectionSpeedAssist);
+
+
     swerveSubsystem = SwerveSubsystem.getInstance();
     joy = driverJoystick;
     translationJoystick = new TunedJoystick(joy.getHID());
@@ -60,14 +75,14 @@ public class ControlledChassisMovement extends Command {
                   omegaRadians * (1 - dampener) * Constants.kLoopSpeed * Math.PI));
       Logger.recordOutput("Controlled Angle", controlledAngle);
       ChassisSpeeds driverSpeeds =
-          swerveSubsystem.getDriveSpeeds(vx, vy, controlledAngle, dampener);
+          swerveSubsystem.getDriveSpeeds(vx, vy, controlledAngle, dampener).plus(antiTipping.getVelocityAntiTipping());
 
       if (joy.getLeftTriggerAxis() >= 0.1) {
-        driverSpeeds = new ChassisSpeeds(0, 0, 0);
+        driverSpeeds = new ChassisSpeeds(0, 0, 0).plus(antiTipping.getVelocityAntiTipping());
       }
       swerveSubsystem.setInputSpeeds(driverSpeeds);
     } else {
-      swerveSubsystem.setInputSpeeds(new ChassisSpeeds(0, 0, 0));
+      swerveSubsystem.setInputSpeeds(new ChassisSpeeds(0, 0, 0).plus(antiTipping.getVelocityAntiTipping()));
     }
   }
 
